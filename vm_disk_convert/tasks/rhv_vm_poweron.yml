@@ -1,0 +1,14 @@
+---
+- name: Power on {{ host }} VM
+  ovirt_vm:
+    auth: "{{ ovirt_auth }}"
+    state: running
+    name: "{{ host }}"
+  tags:
+    - vm_poweron
+
+- name: Wait until VM is reachable
+  wait_for_connection:
+    delay: 15
+  tags:
+    - always

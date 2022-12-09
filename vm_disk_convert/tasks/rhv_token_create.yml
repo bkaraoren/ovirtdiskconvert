@@ -1,0 +1,15 @@
+---
+- name: "Obtain SSO token with using username/password credentials"
+  ovirt_auth:
+    url: "https://{{ rhv_create_vms_rhvm }}/ovirt-engine/api"
+    username: "{{ rhv_create_vms_rhvm_user }}"
+    password: "{{ rhv_create_vms_rhvm_password }}"
+    insecure: false
+  tags:
+    - always
+
+- name: "Setting ovirt auth token on rhvm"
+  set_fact:
+    ovirt_auth: "{{ ovirt_auth }}"
+  tags:
+    - always

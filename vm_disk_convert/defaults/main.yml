@@ -1,0 +1,24 @@
+---
+# paramter used for specifying disk format
+# to convert disk to thin format use keyword 'thin'
+# to convert disk to preallocated format use keyword 'preallocated'
+disk_format: thin
+
+# parameter used automatically for sparcification for the disk
+# Sparsification frees space in the disk image that is
+# not used by its filesystem. As a result, the image
+# will occupy less space on the storage
+disk_sparsify: true
+
+# The following shared variables need to be defined for accessing RHV Manager.
+# RHV Manager URL
+#rhv_create_vms_rhvm: "rhvm host name"
+
+# RHV Manager username
+#rhv_create_vms_rhvm_user: "username"
+
+# RHV Manager password
+#rhv_create_vms_rhvm_password: "password"
+
+# hostname to search and try to convert on RHV
+# host: "host"

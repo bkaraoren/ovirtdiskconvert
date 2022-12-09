@@ -1,0 +1,8 @@
+---
+- name: Revoke the SSO token
+  ovirt_auth:
+    state: absent
+    ovirt_auth: "{{ ovirt_auth }}"
+  when: "rhv_create_vms_revoke_ovirt | default(true)"
+  tags:
+    - always

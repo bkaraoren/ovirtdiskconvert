@@ -1,0 +1,8 @@
+---
+- name: Power off {{ host }} VM
+  ovirt_vm:
+    auth: "{{ ovirt_auth }}"
+    state: stopped
+    name: "{{ host }}"
+  tags:
+    - vm_poweoff
