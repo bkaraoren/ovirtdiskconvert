@@ -3,6 +3,7 @@
 galaxy_info:
   author: Bilhan Karaören, Ali Akkaya
   description: This role converts RHV disks between raw and cow formats
+  role_name: ovirt-disk-convert
   company: Red Hat, Inc.
 
   # If the issue tracker for your role is not on github, uncomment the
