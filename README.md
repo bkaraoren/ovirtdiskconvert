@@ -12,7 +12,7 @@ This role expects a number of variables to be set. See the [defaults/main.yml](d
 
 Dependencies
 ------------
-None
+ovirt.ovirt
 
 Example Playbook
 ----------------
