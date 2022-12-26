@@ -21,7 +21,9 @@ Define variables to convert (see defaults/main.yml for more info):
 Shared variables
 ----------------
 rhv_create_vms_rhvm: "rhvm host name"
+
 rhv_create_vms_rhvm_user: "username"
+
 rhv_create_vms_rhvm_password: "password"
 
 host: "host"
@@ -48,4 +50,5 @@ CC-BY-SA-4.0 (https://creativecommons.org/licenses/by-sa/4.0/)
 Author Information
 ------------------
 Bilhan Karaoeren
+
 Ali Akkaya
