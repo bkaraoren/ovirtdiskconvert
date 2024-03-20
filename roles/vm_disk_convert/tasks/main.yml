@@ -1,87 +1,84 @@
 ---
 - name: Fail if no VM defined
-  fail:
-    msg: "No host defined, please specify `host` variable for which VM to start conversion"
+  ansible.builtin.fail:
+    msg: No host defined, please specify `host` variable for which VM to start conversion
   when:
     - host | length < 1
   tags:
     - get_vm_info
 
-- import_tasks: rhv_token_create.yml
-
-- name: "Gather information for the {{ host }} VM"
+- ansible.builtin.import_tasks: rhv_token_create.yml
+- name: Gather information for the {{ host }} VM
   ovirt_vm_info:
     auth: "{{ ovirt_auth }}"
-    pattern: "name={{ host }}"
+    pattern: name={{ host }}
     fetch_nested: true
   register: vm_info
   tags:
     - get_vm_info
 
-- block:
-  - name: set disk_allocation_policy
-    ansible.builtin.set_fact:
-      disk_allocation_policy: "{% if disk_format == 'thin'%}cow{% elif disk_format == 'preallocated'%}raw{% endif %}"
-    tags:
-      - get_vm_disk_info
-
-  - name: set list of disk ids
-    ansible.builtin.set_fact:
-      ovirt_disk_ids: "{{ ovirt_disk_ids|default([]) + [{ 'disk_id': ovirt_disk_ids_var.1.id }] }}"
-    loop: "{{ vm_info.ovirt_vms | subelements('disk_attachments') }}"
-    loop_control:
-      loop_var: ovirt_disk_ids_var
-      label: "{{ ovirt_disk_ids_var.1.id }}"
-    tags:
-      - get_vm_disk_info
-
-  - name: "Gather disk information for the {{ host }} VM"
-    ovirt_disk_info:
-      auth: "{{ ovirt_auth }}"
-      pattern: "id={{ disk_info_var.disk_id }}"
-      fetch_nested: true
-    loop: "{{ ovirt_disk_ids }}"
-    loop_control:
-      loop_var: disk_info_var
-      label: "{{ disk_info_var.disk_id }}"
-    register: disk_info
-    tags:
-      - get_vm_disk_info
-
-  - name: "Gather disk id format information for {{ host }} VM"
-    ansible.builtin.set_fact:
-      ovirt_matched_format_disk_ids: "{{ ovirt_matched_format_disk_ids|default([]) + [{ 'matched_disk_id': disk_format_info_var.1.id }] }}"
-    register: disk_format_info
-    loop: "{{ disk_info.results | subelements('ovirt_disks') }}"
-    loop_control:
-      loop_var: disk_format_info_var
-      label: "{{ disk_format_info_var.1.id }}"
-    when:
-      - disk_format_info_var.1.format != disk_allocation_policy
-    tags:
-      - get_vm_disk_info
-
-  - block:
-    - include_tasks: "rhv_vm_poweroff.yml"
-
-    - include_tasks: "rhv_disk_convert.yml"
-      loop: "{{ ovirt_matched_format_disk_ids }}"
-      loop_control:
-        loop_var: vm_disk_info
-        label: "{{ vm_disk_info.matched_disk_id }}"
-
-    - include_tasks: "rhv_vm_poweron.yml"
-
-    when:
-      - ovirt_matched_format_disk_ids is defined
-    tags:
-      - vm_convert_disk
-
-  when:
+- when:
     - not vm_info.ovirt_vms | length < 1
   tags:
     - get_vm_info
 
+  block:
+    - name: Set disk_allocation_policy
+      ansible.builtin.set_fact:
+        disk_allocation_policy: "{% if disk_format == 'thin' %}cow{% elif disk_format == 'preallocated' %}raw{% endif %}"
+      tags:
+        - get_vm_disk_info
+
+    - name: Set list of disk ids
+      ansible.builtin.set_fact:
+        ovirt_disk_ids: "{{ ovirt_disk_ids|default([]) + [{ 'disk_id': ovirt_disk_ids_var.1.id }] }}"
+      loop: "{{ vm_info.ovirt_vms | subelements('disk_attachments') }}"
+      loop_control:
+        loop_var: ovirt_disk_ids_var
+        label: "{{ ovirt_disk_ids_var.1.id }}"
+      tags:
+        - get_vm_disk_info
+
+    - name: Gather disk information for the {{ host }} VM
+      ovirt_disk_info:
+        auth: "{{ ovirt_auth }}"
+        pattern: id={{ disk_info_var.disk_id }}
+        fetch_nested: true
+      loop: "{{ ovirt_disk_ids }}"
+      loop_control:
+        loop_var: disk_info_var
+        label: "{{ disk_info_var.disk_id }}"
+      register: disk_info
+      tags:
+        - get_vm_disk_info
+
+    - name: Gather disk id format information for {{ host }} VM
+      ansible.builtin.set_fact:
+        ovirt_matched_format_disk_ids: "{{ ovirt_matched_format_disk_ids|default([]) + [{ 'matched_disk_id': disk_format_info_var.1.id }] }}"
+      register: disk_format_info
+      loop: "{{ disk_info.results | subelements('ovirt_disks') }}"
+      loop_control:
+        loop_var: disk_format_info_var
+        label: "{{ disk_format_info_var.1.id }}"
+      when:
+        - disk_format_info_var.1.format != disk_allocation_policy
+      tags:
+        - get_vm_disk_info
+
+    - when:
+        - ovirt_matched_format_disk_ids is defined
+      tags:
+        - vm_convert_disk
+
+      block:
+        - ansible.builtin.include_tasks: rhv_vm_poweroff.yml
+        - ansible.builtin.include_tasks: rhv_disk_convert.yml
+          loop: "{{ ovirt_matched_format_disk_ids }}"
+          loop_control:
+            loop_var: vm_disk_info
+            label: "{{ vm_disk_info.matched_disk_id }}"
+
+        - ansible.builtin.include_tasks: rhv_vm_poweron.yml
 - name: VM does not exist
   fail:
     msg: "{{ host }} does not exist on RHV"

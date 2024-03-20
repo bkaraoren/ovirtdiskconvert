@@ -1,14 +1,15 @@
 ---
-- name: "Start disk conversion {{ vm_disk_info.matched_disk_id }}"
-  uri:
+- name: Start disk conversion {{ vm_disk_info.matched_disk_id }}
+  ansible.builtin.uri:
     headers:
-      Content-Type: "application/xml"
+      Content-Type: application/xml
       Accept: application/xml
-      Authorization: "Bearer {{ ovirt_auth.token }}"
-    url: "https://{{ rhv_create_vms_rhvm }}/ovirt-engine/api/disks/{{ vm_disk_info.matched_disk_id }}/convert"
+      Authorization: Bearer {{ ovirt_auth.token }}
+    url: https://{{ rhv_create_vms_rhvm }}/ovirt-engine/api/disks/{{ vm_disk_info.matched_disk_id }}/convert
     method: POST
     body_format: json
-    body: "<action><disk><sparse>{% if disk_allocation_policy == 'cow' %}true{% elif disk_allocation_policy == 'raw' %}false{% endif %}</sparse><format>{{ disk_allocation_policy }}</format></disk></action>"
+    body: <action><disk><sparse>{% if disk_allocation_policy == 'cow' %}true{% elif disk_allocation_policy == 'raw' %}false{% endif %}</sparse><format>{{ disk_allocation_policy
+      }}</format></disk></action>
     return_content: true
     status_code: 200
   register: vm_convert_disk
@@ -16,7 +17,7 @@
   tags:
     - vm_convert_disk
 
-- name: "Wait until conversion finished for {{ vm_disk_info.matched_disk_id }}"
+- name: Wait until conversion finished for {{ vm_disk_info.matched_disk_id }}
   ovirt_disk:
     auth: "{{ ovirt_auth }}"
     id: "{{ vm_disk_info.matched_disk_id }}"
