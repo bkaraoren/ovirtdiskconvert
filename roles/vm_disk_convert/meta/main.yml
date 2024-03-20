@@ -1,3 +1,4 @@
+---
 # you can remove this file if you don't need to express dependencies, else
 # add dependent roles as a list to the `dependencies` section. Filling the rest is optional.
 galaxy_info:
